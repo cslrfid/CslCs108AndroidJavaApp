@@ -14,9 +14,12 @@ import android.widget.TextView;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -111,7 +114,7 @@ public class Utility {
             errorDisplay = "denied WRITE_EXTERNAL_STORAGE Permission !!!";
         } else if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) == false) errorDisplay = "Error in mouting external storage !!!";
         else {
-            File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + Environment.DIRECTORY_DOWNLOADS + "/cs108Java");
+            File path = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Environment.DIRECTORY_DOWNLOADS + File.separator + "cs108Java");
             if (path.exists() == false) path.mkdirs();
             if (path.exists() == false) errorDisplay = "Error in making directory !!!";
             else {
@@ -133,14 +136,27 @@ public class Utility {
     }
     void debugFileEnable(boolean enable) { enableFileDebug = enable; }
     void writeDebug2File(String stringDebug) {
-        if (fileDebug != null && enableFileDebug) {
+        if (fileDebug != null && inventoring) {
+            FileOutputStream outputStreamDebug = null;
+            PrintWriter printWriterDebug = null;
             try {
-                FileOutputStream outputStreamDebug = new FileOutputStream(fileDebug, true);
-                PrintWriter printWriterDebug = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(outputStreamDebug), "UTF-8"));
+                outputStreamDebug = new FileOutputStream(fileDebug, true);
+                printWriterDebug = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(outputStreamDebug), "UTF-8"));
                 printWriterDebug.println(stringDebug);
-                printWriterDebug.flush(); printWriterDebug.close();
-                outputStreamDebug.close();
-            } catch (Exception ex) {
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } finally {
+                if(outputStreamDebug != null) {
+                    try {
+                        outputStreamDebug.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if(printWriterDebug != null) {
+                    printWriterDebug.flush();
+                    printWriterDebug.close();
+                }
             }
         }
     }
